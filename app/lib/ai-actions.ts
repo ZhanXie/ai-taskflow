@@ -1,13 +1,11 @@
 "use server";
 
-import { streamText } from "ai";
-import { openai } from "@ai-sdk/openai";
+import crypto from "crypto";
 import { getCurrentUserId } from "./auth";
-import type { AIResponse } from "./ai-utils";
 
 /**
- * 任务 7.1: Create getAISuggestions Server Action using @ai-sdk/openai streamText
- * 生成针对任务标题和描述的 AI 建议
+ * 任务 7.1: Create getAISuggestions Server Action using Tencent Hunyuan
+ * 生成针对任务标题和描述的 AI 建议 (使用腾讯元宝)
  */
 export async function getAISuggestions(
   title: string,
@@ -36,40 +34,139 @@ Respond in JSON format like this:
 }
 
 IMPORTANT: Return ONLY valid JSON, no additional text.`;
-  console.log("OpenAI API Key configured:", !!process.env.OPENAI_API_KEY);
+  console.log("Tencent Hunyuan API configured:", !!(process.env.TENCENT_SECRET_ID && process.env.TENCENT_SECRET_KEY));
   
   try {
-    const { textStream } = await streamText({
-      model: openai("gpt-4o-mini"),
-      messages: [
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-    });
+    // Call Tencent Hunyuan API via HTTP
+    const secretId = process.env.TENCENT_SECRET_ID || "";
+    const secretKey = process.env.TENCENT_SECRET_KEY || "";
+    
+    if (!secretId || !secretKey) {
+      throw new Error("Tencent Cloud credentials not configured");
+    }
+
+    const response = await callHunyuanAPI(prompt, secretId, secretKey);
+    
     // Convert to ReadableStream for client-side consumption
-    return new ReadableStream({
-      async start(controller) {
-        for await (const chunk of textStream) {
-          controller.enqueue(new TextEncoder().encode(chunk));
-        }
+    return new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode(response));
         controller.close();
       },
     });
   } catch (error) {
-    console.error("AI API Error:", error);
+    console.error("Tencent Hunyuan API Error:", error);
     // Provide graceful fallback
     const fallbackResponse = JSON.stringify({
       priority: "MEDIUM",
       dueDate: null,
       reasoning: "AI service temporarily unavailable. Using default suggestions.",
     });
-    return new ReadableStream({
+    return new ReadableStream<Uint8Array>({
       start(controller) {
         controller.enqueue(new TextEncoder().encode(fallbackResponse));
         controller.close();
       },
     });
   }
+}
+
+/**
+ * Call Tencent Hunyuan API with TC3-HMAC-SHA256 authentication
+ */
+async function callHunyuanAPI(
+  prompt: string,
+  secretId: string,
+  secretKey: string
+): Promise<string> {
+  const host = "hunyuan.tencentcloudapi.com";
+  const service = "hunyuan";
+  const action = "ChatPro";
+  const version = "2023-09-01";
+  const algorithm = "TC3-HMAC-SHA256";
+  const timestamp = Math.floor(Date.now() / 1000);
+  const date = new Date(timestamp * 1000).toISOString().split("T")[0];
+
+  // Request body
+  const payload = {
+    Model: "hunyuan-pro",
+    Messages: [
+      {
+        Role: "user",
+        Content: prompt,
+      },
+    ],
+  };
+
+  const payloadStr = JSON.stringify(payload);
+  const payloadHash = crypto
+    .createHash("sha256")
+    .update(payloadStr)
+    .digest("hex");
+
+  // CanonicalRequest
+  const httpRequestMethod = "POST";
+  const canonicalUri = "/";
+  const canonicalQueryString = "";
+  const canonicalHeaders = `content-type:application/json\nhost:${host}\n`;
+  const signedHeaders = "content-type;host";
+
+  const canonicalRequest = `${httpRequestMethod}\n${canonicalUri}\n${canonicalQueryString}\n${canonicalHeaders}\n${signedHeaders}\n${payloadHash}`;
+
+  // StringToSign
+  const canonicalRequestHash = crypto
+    .createHash("sha256")
+    .update(canonicalRequest)
+    .digest("hex");
+
+  const credentialScope = `${date}/${service}/tc3_request`;
+  const stringToSign = `${algorithm}\n${timestamp}\n${credentialScope}\n${canonicalRequestHash}`;
+
+  // Signature
+  const secretDate = crypto
+    .createHmac("sha256", `TC3${secretKey}`)
+    .update(date)
+    .digest();
+  const secretService = crypto
+    .createHmac("sha256", secretDate)
+    .update(service)
+    .digest();
+  const secretSigning = crypto
+    .createHmac("sha256", secretService)
+    .update("tc3_request")
+    .digest();
+  const signature = crypto
+    .createHmac("sha256", secretSigning)
+    .update(stringToSign)
+    .digest("hex");
+
+  // Authorization header
+  const authorization = `${algorithm} Credential=${secretId}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signature}`;
+
+  // Make the API call
+  const response = await fetch(`https://${host}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Host": host,
+      "Authorization": authorization,
+      "X-TC-Action": action,
+      "X-TC-Timestamp": String(timestamp),
+      "X-TC-Version": version,
+    },
+    body: payloadStr,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Hunyuan API error: ${response.status} ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  
+  // Extract response text
+  const responseText = data.Choices?.[0]?.Message?.Content || 
+    data.Choices?.[0]?.Delta?.Content || 
+    "";
+  
+  return responseText;
 }
