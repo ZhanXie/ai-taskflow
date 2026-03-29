@@ -1,20 +1,28 @@
 "use client";
 
-import type { Task } from "@/app/generated/prisma";
 import { updateTask } from "@/app/lib/task-actions";
 import { useState } from "react";
+
+// Type definition
+type TaskStatus = "TODO" | "IN_PROGRESS" | "DONE";
+type TaskPriority = "LOW" | "MEDIUM" | "HIGH";
+
+interface Task {
+  id: string;
+  title: string;
+  description: string | null;
+  status: TaskStatus;
+  priority: TaskPriority;
+  dueDate: Date | null;
+  createdAt: Date;
+  userId: string;
+}
 
 interface TaskCardProps {
   task: Task;
   onDelete: (id: string) => void;
   onEdit: (task: Task) => void;
 }
-
-const statusLabels = {
-  TODO: "Todo",
-  IN_PROGRESS: "In Progress",
-  DONE: "Done",
-};
 
 const priorityLabels = {
   LOW: "Low",
@@ -37,7 +45,7 @@ const statusColors = {
 export default function TaskCard({ task, onDelete, onEdit }: TaskCardProps) {
   const [isUpdating, setIsUpdating] = useState(false);
 
-  async function handleStatusChange(newStatus: typeof task.status) {
+  async function handleStatusChange(newStatus: TaskStatus) {
     try {
       setIsUpdating(true);
       await updateTask(task.id, { status: newStatus });
@@ -90,10 +98,10 @@ export default function TaskCard({ task, onDelete, onEdit }: TaskCardProps) {
           <label className="text-xs font-medium text-gray-600">Status:</label>
           <select
             value={task.status}
-            onChange={(e) => handleStatusChange(e.target.value as any)}
+            onChange={(e) => handleStatusChange(e.target.value as TaskStatus)}
             disabled={isUpdating}
             className={`px-3 py-1 text-xs rounded font-medium cursor-pointer ${
-              statusColors[task.status as keyof typeof statusColors]
+              statusColors[task.status]
             }`}
           >
             <option value="TODO">Todo</option>
@@ -107,10 +115,10 @@ export default function TaskCard({ task, onDelete, onEdit }: TaskCardProps) {
           <label className="text-xs font-medium text-gray-600">Priority:</label>
           <span
             className={`px-3 py-1 text-xs rounded font-medium ${
-              priorityColors[task.priority as keyof typeof priorityColors]
+              priorityColors[task.priority]
             }`}
           >
-            {priorityLabels[task.priority as keyof typeof priorityLabels]}
+            {priorityLabels[task.priority]}
           </span>
         </div>
 

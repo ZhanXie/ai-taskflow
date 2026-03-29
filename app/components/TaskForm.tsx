@@ -3,7 +3,21 @@
 import { useState, FormEvent } from "react";
 import { createTask, updateTask } from "@/app/lib/task-actions";
 import AISuggestions from "./AISuggestions";
-import type { Task } from "@/app/generated/prisma";
+
+// Type definition
+type TaskStatus = "TODO" | "IN_PROGRESS" | "DONE";
+type TaskPriority = "LOW" | "MEDIUM" | "HIGH";
+
+interface Task {
+  id: string;
+  title: string;
+  description: string | null;
+  status: TaskStatus;
+  priority: TaskPriority;
+  dueDate: Date | null;
+  createdAt: Date;
+  userId: string;
+}
 
 interface TaskFormProps {
   task?: Task | null;
@@ -68,7 +82,7 @@ export default function TaskForm({ task, onTaskCreated }: TaskFormProps) {
     suggestedPriority: string,
     suggestedDueDate: string | null
   ) {
-    setPriority(suggestedPriority);
+    setPriority(suggestedPriority as TaskPriority);
     if (suggestedDueDate) {
       setDueDate(suggestedDueDate);
     }
@@ -129,7 +143,7 @@ export default function TaskForm({ task, onTaskCreated }: TaskFormProps) {
           </label>
           <select
             value={priority}
-            onChange={(e) => setPriority(e.target.value)}
+            onChange={(e) => setPriority(e.target.value as TaskPriority)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             disabled={isLoading}
           >

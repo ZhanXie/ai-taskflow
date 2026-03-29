@@ -5,18 +5,21 @@
 ## 环境配置
 
 ### 数据库
+
 - [ ] 创建或获取 Vercel Postgres 实例
 - [ ] 复制数据库连接字符串
 - [ ] 在 Vercel 项目中设置 DATABASE_URL 环境变量
 - [ ] 运行 Prisma 迁移: `npx prisma migrate deploy`
 
 ### Clerk 认证
+
 - [ ] 在 Clerk 仪表板创建或获取 API 密钥
 - [ ] 在 Vercel 中设置 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 - [ ] 在 Vercel 中设置 CLERK_SECRET_KEY
 - [ ] 在 Clerk 中配置生产域名
 
 ### OpenAI
+
 - [ ] 获取 OpenAI API 密钥
 - [ ] 在 Vercel 中设置 OPENAI_API_KEY
 

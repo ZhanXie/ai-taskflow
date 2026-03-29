@@ -2,9 +2,23 @@
 
 import { useEffect, useState } from "react";
 import { getTasks, deleteTask } from "@/app/lib/task-actions";
-import type { Task } from "@/app/generated/prisma";
-import TaskCard from "@/app/components/TaskCard";
-import TaskForm from "@/app/components/TaskForm";
+import TaskCard from "../components/TaskCard";
+import TaskForm from "../components/TaskForm";
+
+// Type definition
+type TaskStatus = "TODO" | "IN_PROGRESS" | "DONE";
+type TaskPriority = "LOW" | "MEDIUM" | "HIGH";
+
+interface Task {
+  id: string;
+  title: string;
+  description: string | null;
+  status: TaskStatus;
+  priority: TaskPriority;
+  dueDate: Date | null;
+  createdAt: Date;
+  userId: string;
+}
 
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);

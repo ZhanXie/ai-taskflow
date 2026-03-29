@@ -3,12 +3,7 @@
 import { streamText } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { getCurrentUserId } from "./auth";
-
-interface AIResponse {
-  priority: "LOW" | "MEDIUM" | "HIGH";
-  dueDate: string | null;
-  reasoning: string;
-}
+import type { AIResponse } from "./ai-utils";
 
 /**
  * 任务 7.1: Create getAISuggestions Server Action using @ai-sdk/openai streamText
@@ -17,7 +12,7 @@ interface AIResponse {
 export async function getAISuggestions(
   title: string,
   description?: string
-): Promise<ReadableStream<Uint8Array>> {
+) {
   // Task 7.2: Implement authentication check
   await getCurrentUserId();
 
@@ -41,42 +36,40 @@ Respond in JSON format like this:
 }
 
 IMPORTANT: Return ONLY valid JSON, no additional text.`;
-
-  const { textStream } = await streamText({
-    model: openai("gpt-4o-mini"),
-    messages: [
-      {
-        role: "user",
-        content: prompt,
-      },
-    ],
-  });
-
-  // Convert Text Stream to Web Stream
-  const stream = textStream.toReadableStream();
-  return stream;
-}
-
-/**
- * 任务 7.3: Parse AI suggestions for priority and due date
- * 从 AI 响应文本解析建议
- */
-export function parseAISuggestions(responseText: string): AIResponse {
+  console.log("OpenAI API Key configured:", !!process.env.OPENAI_API_KEY);
+  
   try {
-    // 尝试解析 JSON
-    const parsed = JSON.parse(responseText);
-
-    // Validate response structure
-    if (!parsed.priority || !["LOW", "MEDIUM", "HIGH"].includes(parsed.priority)) {
-      throw new Error("Invalid priority in AI response");
-    }
-
-    return {
-      priority: parsed.priority,
-      dueDate: parsed.dueDate || null,
-      reasoning: parsed.reasoning || "AI suggestion",
-    };
+    const { textStream } = await streamText({
+      model: openai("gpt-4o-mini"),
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+    });
+    // Convert to ReadableStream for client-side consumption
+    return new ReadableStream({
+      async start(controller) {
+        for await (const chunk of textStream) {
+          controller.enqueue(new TextEncoder().encode(chunk));
+        }
+        controller.close();
+      },
+    });
   } catch (error) {
-    throw new Error(`Failed to parse AI suggestions: ${error}`);
+    console.error("AI API Error:", error);
+    // Provide graceful fallback
+    const fallbackResponse = JSON.stringify({
+      priority: "MEDIUM",
+      dueDate: null,
+      reasoning: "AI service temporarily unavailable. Using default suggestions.",
+    });
+    return new ReadableStream({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode(fallbackResponse));
+        controller.close();
+      },
+    });
   }
 }

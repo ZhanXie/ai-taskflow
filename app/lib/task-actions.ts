@@ -1,12 +1,14 @@
 "use server";
 
-import type { Task } from "@/app/generated/prisma";
-import type { TaskStatus, Priority } from "@/app/generated/prisma";
-import { PrismaClient } from "@/app/generated/prisma";
+import { prisma } from "./prisma";
 import { getCurrentUserId, verifyOwnership } from "./auth";
-import { z } from "zod";
+import { z, ZodError } from "zod";
 
-const prisma = new PrismaClient();
+// Type aliases
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Task = any;
+type TaskStatus = "TODO" | "IN_PROGRESS" | "DONE";
+type Priority = "LOW" | "MEDIUM" | "HIGH";
 
 // Schema for validation
 const TaskSchema = z.object({
@@ -42,8 +44,8 @@ export async function createTask(input: TaskInput): Promise<Task> {
 
     return task;
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      throw new Error(`Validation error: ${error.errors.map(e => e.message).join(", ")}`);
+    if (error instanceof ZodError) {
+      throw new Error(`Validation error: ${error.issues.map(e => e.message).join(", ")}`);
     }
     throw error;
   }
@@ -85,8 +87,6 @@ export async function getTasks(
  * Task 4.3: Create getTask Server Action to fetch single task by id
  */
 export async function getTask(id: string): Promise<Task> {
-  const userId = await getCurrentUserId();
-  
   const task = await prisma.task.findUnique({
     where: { id },
   });
@@ -106,8 +106,6 @@ export async function getTask(id: string): Promise<Task> {
  * Task 4.4: Create updateTask Server Action with optimistic updates
  */
 export async function updateTask(id: string, input: Partial<TaskInput>): Promise<Task> {
-  const userId = await getCurrentUserId();
-  
   // Get existing task to verify ownership
   const existingTask = await prisma.task.findUnique({
     where: { id },
@@ -138,8 +136,6 @@ export async function updateTask(id: string, input: Partial<TaskInput>): Promise
  * Task 4.5: Create deleteTask Server Action with authorization check
  */
 export async function deleteTask(id: string): Promise<void> {
-  const userId = await getCurrentUserId();
-  
   // Get task to verify ownership
   const task = await prisma.task.findUnique({
     where: { id },

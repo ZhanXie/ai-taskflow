@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { getAISuggestions, parseAISuggestions } from "@/app/lib/ai-actions";
-import type { Task } from "@/app/generated/prisma";
+import { getAISuggestions } from "@/app/lib/ai-actions";
+import { parseAISuggestions } from "@/app/lib/ai-utils";
 
 interface AISuggestionsProps {
   title: string;

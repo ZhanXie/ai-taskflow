@@ -4,11 +4,26 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:all": "npm run db:migrate -- --skip-generate && npm run dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "type-check": "tsc --noEmit",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:prod": "prisma migrate deploy",
+    "db:generate": "prisma generate",
+    "db:studio": "prisma studio",
+    "db:seed": "node prisma/seed.js",
+    "db:reset": "prisma migrate reset",
+    "db:push": "prisma db push",
+    "db:pull": "prisma db pull",
+    "clean": "rm -rf .next dist node_modules && npm install",
+    "clean:cache": "rm -rf .next",
+    "format": "prettier --write ."
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.64",
     "@ai-sdk/openai": "^3.0.48",
     "@clerk/nextjs": "^7.0.7",
     "@prisma/client": "^6.19.2",
