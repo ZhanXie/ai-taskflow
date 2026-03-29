@@ -87,9 +87,8 @@ async function callHunyuanAPI(
   const timestamp = Math.floor(Date.now() / 1000);
   const date = new Date(timestamp * 1000).toISOString().split("T")[0];
 
-  // Request body
+  // Request body - ChatPro 不需要 Model 参数
   const payload = {
-    Model: "hunyuan-pro",
     Messages: [
       {
         Role: "user",
@@ -158,15 +157,49 @@ async function callHunyuanAPI(
   });
 
   if (!response.ok) {
-    throw new Error(`Hunyuan API error: ${response.status} ${response.statusText}`);
+    const errorText = await response.text();
+    console.error(
+      `Hunyuan API error: ${response.status} ${response.statusText}`,
+      errorText
+    );
+    throw new Error(
+      `Hunyuan API error: ${response.status} ${response.statusText}`
+    );
   }
 
   const data = await response.json();
   
+  // Handle Response wrapper from Tencent API  
+  const actualData = data.Response || data;
+  
+  // Check for API errors in response
+  if (actualData.Error) {
+    const errorCode = actualData.Error.Code;
+    const errorMsg = actualData.Error.Message;
+    console.error("Hunyuan API Error Response:", actualData.Error);
+    
+    // Provide helpful error messages
+    if (errorCode === "AuthFailure.UnauthorizedOperation") {
+      throw new Error(
+        `Permission denied. Please check: 1) Sub-account has ChatPro permission 2) API key is active 3) Check CAM policies`
+      );
+    }
+    if (errorCode.includes("UnknownParameter")) {
+      throw new Error(
+        `API parameter error: ${errorMsg}. This may be an API version issue.`
+      );
+    }
+    throw new Error(`Hunyuan API Error: ${errorMsg}`);
+  }
+  
   // Extract response text
-  const responseText = data.Choices?.[0]?.Message?.Content || 
-    data.Choices?.[0]?.Delta?.Content || 
+  const responseText = actualData.Choices?.[0]?.Message?.Content || 
+    actualData.Choices?.[0]?.Delta?.Content || 
     "";
+  
+  if (!responseText) {
+    console.warn("Empty response from Hunyuan API:", JSON.stringify(actualData).substring(0, 200));
+  }
   
   return responseText;
 }

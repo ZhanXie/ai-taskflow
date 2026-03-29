@@ -136,7 +136,25 @@ export default function AISuggestions({
 
       {/* Error Message */}
       {error && (
-        <div className="p-3 bg-red-100 text-red-700 rounded text-sm">{error}</div>
+        <div className="p-3 bg-red-100 text-red-700 rounded text-sm">
+          <div className="font-semibold mb-1">❌ Error</div>
+          <div>{error}</div>
+          <details className="mt-2 text-xs">
+            <summary className="cursor-pointer underline">Debug Info</summary>
+            <div className="mt-1 p-2 bg-white rounded font-mono text-gray-600">
+              {streamingText && (
+                <div className="mb-2">
+                  <div className="font-semibold">Raw Response:</div>
+                  <div className="max-h-20 overflow-auto whitespace-pre-wrap break-words">
+                    {streamingText.substring(0, 200)}
+                    {streamingText.length > 200 ? "..." : ""}
+                  </div>
+                </div>
+              )}
+              <div>Check browser console for more details</div>
+            </div>
+          </details>
+        </div>
       )}
 
       {/* Streaming Response */}
