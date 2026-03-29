@@ -87,7 +87,7 @@ async function callHunyuanAPI(
   const timestamp = Math.floor(Date.now() / 1000);
   const date = new Date(timestamp * 1000).toISOString().split("T")[0];
 
-  // Request body - ChatPro 不需要 Model 参数
+  // Request body - ChatPro 不需要 Model 参数，禁用流式响应
   const payload = {
     Messages: [
       {
@@ -95,6 +95,7 @@ async function callHunyuanAPI(
         Content: prompt,
       },
     ],
+    Stream: false,
   };
 
   const payloadStr = JSON.stringify(payload);
@@ -167,11 +168,27 @@ async function callHunyuanAPI(
     );
   }
 
-  const data = await response.json();
+  // Parse response - handle both JSON and SSE (Server-Sent Events) formats
+  const rawResponseText = await response.text();
+  let data;
   
+  try {
+    // First try direct JSON parsing (standard response)
+    data = JSON.parse(rawResponseText);
+  } catch (e) {
+    // If that fails, try parsing as SSE format: "data: {...}" lines
+    const lines = rawResponseText.split("\n").filter((line) => line.trim());
+    const dataLine = lines.find((line) => line.startsWith("data:"));
+    
+    if (dataLine) {
+      const jsonStr = dataLine.substring(5).trim(); // Remove "data:" prefix
+      data = JSON.parse(jsonStr);
+    } else {
+      throw new Error(`Failed to parse Hunyuan API response: ${rawResponseText.substring(0, 100)}`);
+    }
+  }
   // Handle Response wrapper from Tencent API  
   const actualData = data.Response || data;
-  
   // Check for API errors in response
   if (actualData.Error) {
     const errorCode = actualData.Error.Code;
@@ -196,7 +213,6 @@ async function callHunyuanAPI(
   const responseText = actualData.Choices?.[0]?.Message?.Content || 
     actualData.Choices?.[0]?.Delta?.Content || 
     "";
-  
   if (!responseText) {
     console.warn("Empty response from Hunyuan API:", JSON.stringify(actualData).substring(0, 200));
   }

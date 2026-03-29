@@ -32,7 +32,7 @@ async function testHunyuanAPI() {
     const timestamp = Math.floor(Date.now() / 1000);
     const date = new Date(timestamp * 1000).toISOString().split("T")[0];
 
-    // Request body - 尝试没有 Model 字段
+    // Request body - 尝试没有 Model 字段，禁用流式响应
     const payload = {
       Messages: [
         {
@@ -40,6 +40,7 @@ async function testHunyuanAPI() {
           Content: "Respond with ONLY a JSON object: {\"priority\": \"MEDIUM\", \"dueDate\": null, \"reasoning\": \"test\"}",
         },
       ],
+      Stream: false,
     };
 
     const payloadStr = JSON.stringify(payload);
@@ -116,7 +117,25 @@ async function testHunyuanAPI() {
       return false;
     }
 
-    const data = JSON.parse(responseText);
+    // Parse response - handle both JSON and SSE (Server-Sent Events) formats
+    let data;
+    try {
+      // First try direct JSON parsing (standard response)
+      data = JSON.parse(responseText);
+    } catch (e) {
+      // If that fails, try parsing as SSE format: "data: {...}" lines
+      const lines = responseText.split("\n").filter((line) => line.trim());
+      const dataLine = lines.find((line) => line.startsWith("data:"));
+      
+      if (dataLine) {
+        const jsonStr = dataLine.substring(5).trim(); // Remove "data:" prefix
+        data = JSON.parse(jsonStr);
+      } else {
+        console.error(`❌ 无法解析响应格式`);
+        console.error(`   原始响应：${responseText.substring(0, 300)}`);
+        return false;
+      }
+    }
 
     if (data.Error) {
       console.error(`❌ API 返回错误`);
@@ -127,20 +146,25 @@ async function testHunyuanAPI() {
 
     // 3. 检查响应格式
     console.log("3️⃣ 检查响应格式...");
+    console.log(`   完整API响应结构：`);
+    console.log(`   ${JSON.stringify(data, null, 2)}\n`);
+    
     const responseContent =
       data.Choices?.[0]?.Message?.Content ||
       data.Choices?.[0]?.Delta?.Content ||
+      data.Response?.Choices?.[0]?.Message?.Content ||
+      data.Response?.Choices?.[0]?.Delta?.Content ||
       "";
 
     if (!responseContent) {
       console.error(`❌ 响应为空`);
-      console.error(`   完整响应：${JSON.stringify(data).substring(0, 300)}`);
+      console.error(`   完整响应：${JSON.stringify(data).substring(0, 500)}`);
       return false;
     }
 
     console.log("✅ 响应内容正常");
     console.log(`   内容长度：${responseContent.length} 字符`);
-    console.log(`   内容预览：${responseContent.substring(0, 100)}...\n`);
+    console.log(`   内容预览：${responseContent.substring(0, 200)}...\n`);
 
     // 4. 检查是否能解析JSON
     console.log("4️⃣ 尝试解析 JSON 响应...");

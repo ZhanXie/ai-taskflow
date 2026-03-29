@@ -194,7 +194,7 @@ export default function AISuggestions({
 
           {suggestions.reasoning && (
             <div className="text-sm text-green-800 italic">
-              "{suggestions.reasoning}"
+              {suggestions.reasoning}
             </div>
           )}
 
