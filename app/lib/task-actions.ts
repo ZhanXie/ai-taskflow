@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "./prisma";
+import { db as prisma } from "./prisma";
 import { getCurrentUserId, verifyOwnership } from "./auth";
 import { z, ZodError } from "zod";
 

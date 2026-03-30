@@ -14,3 +14,6 @@ if (!process.env.DATABASE_URL) {
 }
 
 export default {};
+
+// This file has been removed as database configuration is now handled in app/lib/prisma.ts
+// using Next.js 16 built-in environment variable management.
