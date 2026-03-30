@@ -81,7 +81,9 @@ async function callHunyuanAPI(
 ): Promise<string> {
   const host = "hunyuan.tencentcloudapi.com";
   const service = "hunyuan";
-  const action = "ChatStd";
+  // const action = "ChatStd";
+  // const action = "ChatPro";
+  const action = "ChatCompletions"; // Use the lightweight model for faster responses
   const version = "2023-09-01";
   const algorithm = "TC3-HMAC-SHA256";
   const timestamp = Math.floor(Date.now() / 1000);
