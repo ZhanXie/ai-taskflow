@@ -13,7 +13,7 @@
 2. **代码改动**
    - `app/lib/ai-actions.ts` - 使用腾讯元宝 API 替代 OpenAI
    - 实现 TC3-HMAC-SHA256 认证机制
-   - 调用 Hunyuan ChatPro 模型
+   - 调用 Hunyuan ChatStd 模型（支持 hunyuan-lite）
 
 3. **环境配置**
    - `.env.local` - 更新为腾讯云凭证
@@ -67,16 +67,20 @@ npm run dev:all
 
 ## 模型说明
 
-当前配置使用：**`hunyuan-pro`**（高级模型）
+当前配置使用：**`hunyuan-lite`**（轻量级模型，成本最低）
 
 ### 可用模型
-- `hunyuan-pro` - 高性能模型（推荐）
-- `hunyuan` - 标准模型
-- `hunyuan-lite` - 轻量级模型（成本最低）
+- `hunyuan-pro` - 高性能模型（成本最高）
+- `hunyuan` - 标准模型（中等成本）
+- `hunyuan-lite` - 轻量级模型（成本最低，推荐）
 
-若要更改模型，编辑 `app/lib/ai-actions.ts` 第 82 行：
+若要更改模型，编辑 `app/lib/ai-actions.ts` 中 `callHunyuanAPI` 函数：
 ```typescript
-Model: "hunyuan-pro",  // 改为其他模型名称
+const payload = {
+  Model: "hunyuan-lite",  // 改为其他模型名称
+  Messages: [...],
+  Stream: false,
+};
 ```
 
 ## 计费说明

@@ -5,7 +5,7 @@ import { getCurrentUserId } from "./auth";
 
 /**
  * 任务 7.1: Create getAISuggestions Server Action using Tencent Hunyuan
- * 生成针对任务标题和描述的 AI 建议 (使用腾讯元宝)
+ * 生成针对任务标题和描述的 AI 建议 (使用腾讯元宝 hunyuan-lite 模型)
  */
 export async function getAISuggestions(
   title: string,
@@ -81,14 +81,15 @@ async function callHunyuanAPI(
 ): Promise<string> {
   const host = "hunyuan.tencentcloudapi.com";
   const service = "hunyuan";
-  const action = "ChatPro";
+  const action = "ChatStd";
   const version = "2023-09-01";
   const algorithm = "TC3-HMAC-SHA256";
   const timestamp = Math.floor(Date.now() / 1000);
   const date = new Date(timestamp * 1000).toISOString().split("T")[0];
 
-  // Request body - ChatPro 不需要 Model 参数，禁用流式响应
+  // Request body - 使用 hunyuan-lite 模型，禁用流式响应
   const payload = {
+    Model: "hunyuan-lite",
     Messages: [
       {
         Role: "user",

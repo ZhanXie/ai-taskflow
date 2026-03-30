@@ -11,10 +11,10 @@
 | **Vercel** | - | Hobby/Pro | $20-100 |
 | **Vercel Postgres** | - | 按使用量 | $15-30 |
 | **Clerk** | 10k 用户 | 按用户计费 | $0-50 |
-| **Tencent Hunyuan** | - | 按 token | $10-50 |
+| **Tencent Hunyuan** | - | 按 token (lite) | $2-10 |
 | **DNS/域名** | - | - | $5-15 |
 | **其他** | - | - | $0-20 |
-| **总计** | - | - | **$50-265/月** |
+| **总计** | - | - | **$42-225/月** |
 
 ### 使用量假设
 - 日活用户 (DAU): 100-500
@@ -132,9 +132,12 @@ Vercel Postgres 自动启用 PgBouncer。无需配置。
 
 ## Tencent Hunyuan API 成本优化
 
+### 当前使用模型
+- **模型**: hunyuan-lite（轻量级，成本最低）
+
 ### 当前定价 (大概)
-- **输入 token**: $0.0006 per 1k tokens
-- **输出 token**: $0.001 per 1k tokens
+- **输入 token**: $0.0001 per 1k tokens (hunyuan-lite - 最低价)
+- **输出 token**: $0.0003 per 1k tokens (hunyuan-lite - 最低价)
 - **建议**: 每个用户请求 ~500 tokens
 
 ### 成本估算
@@ -142,10 +145,17 @@ Vercel Postgres 自动启用 PgBouncer。无需配置。
 每日请求数: 1000
 平均 token 数: 500
 月使用量: 15M tokens
-预计月成本: $9-15
+预计月成本: $2-5 (使用 hunyuan-lite)
 
-优化目标: < $10/月
+优化目标: < $5/月
 ```
+
+### 模型对比 (参考)
+| 模型 | 输入价格 | 输出价格 | 适用场景 |
+|-----|---------|---------|---------|
+| hunyuan-lite | $0.0001 | $0.0003 | 简单建议、低成本 ✓ 当前 |
+| hunyuan | $0.0005 | $0.001 | 通用任务 |
+| hunyuan-pro | $0.001 | $0.002 | 复杂推理 |
 
 ### 优化建议
 
@@ -292,8 +302,8 @@ Clerk Dashboard -> Analytics
 Vercel:        $20/月
 Database:      $10/月
 Clerk:         $0/月
-Hunyuan:       $5/月
-总计:          $35/月
+Hunyuan-lite:  $2/月
+总计:          $32/月
 ```
 
 ### 中等规模 (1000-10000 DAU)
@@ -301,8 +311,8 @@ Hunyuan:       $5/月
 Vercel:        $50/月
 Database:      $30/月
 Clerk:         $20/月
-Hunyuan:       $30/月
-总计:          $130/月
+Hunyuan-lite:  $8/月
+总计:          $108/月
 ```
 
 ### 大规模 (> 10000 DAU)
@@ -310,8 +320,8 @@ Hunyuan:       $30/月
 Vercel:        $100/月
 Database:      $100+/月
 Clerk:         $100+/月
-Hunyuan:       $200+/月
-总计:          $500+/月
+Hunyuan-lite:  $50+/月 (比 pro 便宜 75%)
+总计:          $350+/月
 ```
 
 ---
