@@ -9,8 +9,9 @@ generator client {
   output   = "./generated"
 }
 
-// For local development: SQLite
-// For production: Change provider to "postgresql" and use PostgreSQL DATABASE_URL
+// For local development: SQLite (hard-coded as default provider)
+// For production: The application code will handle PostgreSQL connection dynamically
+// Note: Prisma schema datasource provider does not support env() function
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
