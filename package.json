@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "dev:all": "npm run db:migrate -- --skip-generate && npm run dev",
+    "dev": "next dev --webpack",
+    "dev:local": "bash scripts/start-local.sh",
+    "dev:db": "docker compose up -d && sleep 5 && npm run db:migrate",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
@@ -13,7 +14,7 @@
     "db:migrate": "prisma migrate dev",
     "db:migrate:prod": "prisma migrate deploy",
     "db:generate": "prisma generate",
-    "db:studio": "DATABASE_PROVIDER=sqlite prisma studio",
+    "db:studio": "prisma studio",
     "db:seed": "node prisma/seed.js",
     "db:reset": "prisma migrate reset",
     "db:push": "prisma db push",
@@ -27,25 +28,25 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.64",
-    "@clerk/nextjs": "^7.0.7",
-    "@prisma/client": "^6.19.2",
-    "ai": "^6.0.141",
+    "@clerk/nextjs": "^7.0.8",
+    "@prisma/client": "^6.19.3",
+    "ai": "^6.0.142",
     "clerk": "^0.8.3",
-    "next": "16.2.1",
+    "next": "16.2.2",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "tencentcloud-sdk-nodejs": "^4.0.0",
+    "tencentcloud-sdk-nodejs": "^4.1.204",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^25.5.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.1",
-    "prisma": "^6.19.2",
+    "eslint": "^10.1.0",
+    "eslint-config-next": "16.2.2",
+    "prisma": "^6.19.3",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^6.0.2"
   }
 }

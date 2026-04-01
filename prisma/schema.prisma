@@ -1,27 +1,14 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "./generated"
+  provider = "prisma-client-js"
 }
 
-// For local development: SQLite (hard-coded as default provider)
-// For production: The application code will handle PostgreSQL connection dynamically
-// Note: Prisma schema datasource provider does not support env() function
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// For development with SQLite, use DATABASE_URL="file:./prisma/dev.db" in .env.local
-// For production with Vercel Postgres, use DATABASE_URL="<vercel-postgres-url>" in .env
-
 model Task {
-  id          String    @id @default(cuid())
+  id          String     @id @default(cuid())
   title       String
   description String?
   status      TaskStatus @default(TODO)

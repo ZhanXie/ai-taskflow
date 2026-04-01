@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Taskflow
 
-## Getting Started
+Task management application with AI suggestions built with Next.js 16, Prisma, and PostgreSQL.
 
-First, run the development server:
+## Local Development Setup
 
+### Prerequisites
+- Node.js 18+
+- Docker and Docker Compose
+- npm or yarn
+
+### Quick Start
+
+1. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+2. **Start local PostgreSQL database**
+   ```bash
+   # Start database container
+   docker compose up -d
+   
+   # Or use the convenience script
+   npm run dev:db
+   ```
+
+3. **Run database migrations**
+   ```bash
+   npm run db:migrate
+   ```
+
+4. **Start development server**
+   ```bash
+   npm run dev
+   ```
+
+### One-command setup
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# This will start database, run migrations, and start the dev server
+npm run dev:local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Database Configuration
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Local Database URL**: `postgresql://postgres:postgres@localhost:5432/ai_taskflow`
+- **Database Schema**: `public`
+- **Docker Container**: `ai-taskflow-postgres`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Environment Variables
 
-## Learn More
+Create a `.env.local` file in the project root:
 
-To learn more about Next.js, take a look at the following resources:
+```env
+# Database
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ai_taskflow?schema=public
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Authentication (required for Clerk)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+CLERK_SECRET_KEY=your_clerk_secret_key
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# AI Providers (optional)
+ANTHROPIC_API_KEY=your_anthropic_api_key
+```
 
-## Deploy on Vercel
+### Available Scripts
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `npm run dev`: Start development server (Webpack mode)
+- `npm run dev:local`: Start database + migrations + dev server
+- `npm run dev:db`: Start database and run migrations
+- `npm run db:migrate`: Run database migrations
+- `npm run db:studio`: Open Prisma Studio
+- `npm run build`: Build for production
+- `npm run start`: Start production server
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Production Deployment
+
+For production, set the `DATABASE_URL` environment variable to your PostgreSQL database URL.
+
+The application uses the same PostgreSQL provider for both development and production environments.
