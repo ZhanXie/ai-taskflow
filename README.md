@@ -35,12 +35,6 @@ Task management application with AI suggestions built with Next.js 16, Prisma, a
    npm run dev
    ```
 
-### One-command setup
-```bash
-# This will start database, run migrations, and start the dev server
-npm run dev:local
-```
-
 ### Database Configuration
 
 - **Local Database URL**: `postgresql://postgres:postgres@localhost:5432/ai_taskflow`

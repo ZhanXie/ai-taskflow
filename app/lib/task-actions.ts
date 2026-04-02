@@ -5,7 +5,7 @@ import { getCurrentUserId, verifyOwnership } from "./auth";
 import { z, ZodError } from "zod";
 
 // Type aliases
-type Task = Awaited<ReturnType<typeof prisma.task.findUnique>>;
+type Task = any;
 type TaskStatus = "TODO" | "IN_PROGRESS" | "DONE";
 type Priority = "LOW" | "MEDIUM" | "HIGH";
 
