@@ -13,7 +13,6 @@ export interface AIResponse {
 export function parseAISuggestions(responseText: string): AIResponse {
   // Handle empty response
   if (!responseText || responseText.trim() === "") {
-    console.warn("Empty response from AI, using default suggestions");
     return {
       priority: "MEDIUM",
       dueDate: null,

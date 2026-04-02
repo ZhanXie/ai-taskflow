@@ -34,7 +34,6 @@ Respond in JSON format like this:
 }
 
 IMPORTANT: Return ONLY valid JSON, no additional text.`;
-  console.log("Tencent Hunyuan API configured:", !!(process.env.TENCENT_SECRET_ID && process.env.TENCENT_SECRET_KEY));
   
   try {
     // Call Tencent Hunyuan API via HTTP
@@ -178,7 +177,7 @@ async function callHunyuanAPI(
   try {
     // First try direct JSON parsing (standard response)
     data = JSON.parse(rawResponseText);
-  } catch (e) {
+  } catch (_e) {
     // If that fails, try parsing as SSE format: "data: {...}" lines
     const lines = rawResponseText.split("\n").filter((line) => line.trim());
     const dataLine = lines.find((line) => line.startsWith("data:"));
@@ -217,7 +216,7 @@ async function callHunyuanAPI(
     actualData.Choices?.[0]?.Delta?.Content || 
     "";
   if (!responseText) {
-    console.warn("Empty response from Hunyuan API:", JSON.stringify(actualData).substring(0, 200));
+    console.error("Empty response from Hunyuan API:", JSON.stringify(actualData).substring(0, 200));
   }
   
   return responseText;

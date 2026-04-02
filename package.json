@@ -2,6 +2,7 @@
   "name": "ai-taskflow",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev --webpack",
     "dev:local": "bash scripts/start-local.sh",
@@ -24,7 +25,7 @@
     "format": "prettier --write .",
     "pre-deploy": "bash scripts/pre-deploy-check.sh",
     "deploy:staging": "npm run pre-deploy && echo 'Ready for staging deployment'",
-    "deploy:production": "npm run pre-deploy && echo 'Ready for production deployment'"
+    "deploy:production": "npm run pre-deploy && next build"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.64",
@@ -43,7 +44,7 @@
     "@types/node": "^25.5.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^10.1.0",
+    "eslint": "^9.39.4",
     "eslint-config-next": "16.2.2",
     "prisma": "^6.19.3",
     "tailwindcss": "^4",
