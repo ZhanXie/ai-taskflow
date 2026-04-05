@@ -3,7 +3,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "AI Taskflow",
+  title: "AI Taskflow development",
   description: "Task management with AI suggestions",
 };
 
