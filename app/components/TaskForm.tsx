@@ -4,21 +4,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { createTask, updateTask } from "@/app/lib/task-actions";
 import AISuggestions from "./AISuggestions";
-
-// Type definition
-type TaskStatus = "TODO" | "IN_PROGRESS" | "DONE";
-type TaskPriority = "LOW" | "MEDIUM" | "HIGH";
-
-interface Task {
-  id: string;
-  title: string;
-  description: string | null;
-  status: TaskStatus;
-  priority: TaskPriority;
-  dueDate: Date | null;
-  createdAt: Date;
-  userId: string;
-}
+import type { Task, Priority } from "@/app/lib/types";
 
 interface TaskFormProps {
   task?: Task | null;
@@ -83,7 +69,7 @@ export default function TaskForm({ task, onTaskCreated }: TaskFormProps) {
     suggestedPriority: string,
     suggestedDueDate: string | null
   ) {
-    setPriority(suggestedPriority as TaskPriority);
+    setPriority(suggestedPriority as Priority);
     if (suggestedDueDate) {
       setDueDate(suggestedDueDate);
     }
@@ -144,7 +130,7 @@ export default function TaskForm({ task, onTaskCreated }: TaskFormProps) {
           </label>
           <select
             value={priority}
-            onChange={(e) => setPriority(e.target.value as TaskPriority)}
+            onChange={(e) => setPriority(e.target.value as Priority)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             disabled={isLoading}
           >
