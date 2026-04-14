@@ -1,13 +1,9 @@
 "use server";
 
 import { prisma } from "./prisma";
-import { getCurrentUserId, verifyOwnership } from "./auth";
+import { getCurrentUserId } from "./auth";
 import { z, ZodError } from "zod";
-
-// Type aliases
-type Task = any;
-type TaskStatus = "TODO" | "IN_PROGRESS" | "DONE";
-type Priority = "LOW" | "MEDIUM" | "HIGH";
+import type { Task, TaskStatus, Priority } from "@prisma/client";
 
 // Schema for validation
 const TaskSchema = z.object({
@@ -27,17 +23,24 @@ type TaskInput = z.infer<typeof TaskSchema>;
 export async function createTask(input: TaskInput): Promise<Task> {
   try {
     const userId = await getCurrentUserId();
-    
+
     // Validate input
     const validated = TaskSchema.parse(input);
-    
+
+    // Ensure user exists in database (create if not exists)
+    await prisma.user.upsert({
+      where: { id: userId },
+      create: { id: userId },
+      update: {},
+    });
+
     const task = await prisma.task.create({
       data: {
         ...validated,
         userId,
         dueDate: validated.dueDate ? new Date(validated.dueDate) : null,
-        status: (validated.status as TaskStatus) || "TODO",
-        priority: (validated.priority as Priority) || "MEDIUM",
+        status: (validated.status as TaskStatus) ?? "TODO",
+        priority: (validated.priority as Priority) ?? "MEDIUM",
       },
     });
 
@@ -70,7 +73,7 @@ export async function getTasks(
   const order = options?.order || "desc";
 
   const tasks = await prisma.task.findMany({
-    where: { userId },
+    where: { userId, deletedAt: null },
     skip,
     take,
     orderBy: {
@@ -86,16 +89,15 @@ export async function getTasks(
  * Task 4.3: Create getTask Server Action to fetch single task by id
  */
 export async function getTask(id: string): Promise<Task> {
+  const userId = await getCurrentUserId();
+
   const task = await prisma.task.findUnique({
-    where: { id },
+    where: { id, userId, deletedAt: null },
   });
 
   if (!task) {
     throw new Error("Task not found");
   }
-
-  // Verify ownership
-  await verifyOwnership(task.userId);
 
   return task;
 }
@@ -105,16 +107,16 @@ export async function getTask(id: string): Promise<Task> {
  * Task 4.4: Create updateTask Server Action with optimistic updates
  */
 export async function updateTask(id: string, input: Partial<TaskInput>): Promise<Task> {
-  // Get existing task to verify ownership
+  const userId = await getCurrentUserId();
+
+  // Get existing task to verify ownership (atomic query)
   const existingTask = await prisma.task.findUnique({
-    where: { id },
+    where: { id, userId, deletedAt: null },
   });
 
   if (!existingTask) {
     throw new Error("Task not found");
   }
-
-  await verifyOwnership(existingTask.userId);
 
   // Validate input
   const validated = TaskSchema.partial().parse(input);
@@ -135,18 +137,20 @@ export async function updateTask(id: string, input: Partial<TaskInput>): Promise
  * Task 4.5: Create deleteTask Server Action with authorization check
  */
 export async function deleteTask(id: string): Promise<void> {
-  // Get task to verify ownership
+  const userId = await getCurrentUserId();
+
+  // Get task to verify ownership (atomic query)
   const task = await prisma.task.findUnique({
-    where: { id },
+    where: { id, userId, deletedAt: null },
   });
 
   if (!task) {
     throw new Error("Task not found");
   }
 
-  await verifyOwnership(task.userId);
-
-  await prisma.task.delete({
+  // Soft delete
+  await prisma.task.update({
     where: { id },
+    data: { deletedAt: new Date() },
   });
 }
