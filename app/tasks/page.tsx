@@ -1,24 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getTasks, deleteTask } from "@/app/lib/task-actions";
+import { getTasks, deleteTask, updateTask } from "@/app/lib/task-actions";
 import TaskCard from "../components/TaskCard";
 import TaskForm from "../components/TaskForm";
-
-// Type definition
-type TaskStatus = "TODO" | "IN_PROGRESS" | "DONE";
-type TaskPriority = "LOW" | "MEDIUM" | "HIGH";
-
-interface Task {
-  id: string;
-  title: string;
-  description: string | null;
-  status: TaskStatus;
-  priority: TaskPriority;
-  dueDate: Date | null;
-  createdAt: Date;
-  userId: string;
-}
+import type { Task, TaskStatus } from "@/app/lib/types";
 
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -53,6 +39,11 @@ export default function TasksPage() {
         alert("Failed to delete task");
       }
     }
+  }
+
+  async function handleStatusChange(id: string, status: TaskStatus) {
+    await updateTask(id, { status });
+    setTasks(tasks.map(t => t.id === id ? { ...t, status } : t));
   }
 
   function handleTaskCreated() {
@@ -112,6 +103,7 @@ export default function TasksPage() {
                   setEditingTask(task);
                   setShowForm(true);
                 }}
+                onStatusChange={handleStatusChange}
               />
             ))}
           </div>

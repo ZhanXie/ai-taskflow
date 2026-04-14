@@ -1,27 +1,13 @@
 "use client";
 
-import { updateTask } from "@/app/lib/task-actions";
 import { useState } from "react";
-
-// Type definition
-type TaskStatus = "TODO" | "IN_PROGRESS" | "DONE";
-type TaskPriority = "LOW" | "MEDIUM" | "HIGH";
-
-interface Task {
-  id: string;
-  title: string;
-  description: string | null;
-  status: TaskStatus;
-  priority: TaskPriority;
-  dueDate: Date | null;
-  createdAt: Date;
-  userId: string;
-}
+import type { Task, TaskStatus } from "@/app/lib/types";
 
 interface TaskCardProps {
   task: Task;
   onDelete: (id: string) => void;
   onEdit: (task: Task) => void;
+  onStatusChange: (id: string, status: TaskStatus) => Promise<void>;
 }
 
 const priorityLabels = {
@@ -42,15 +28,13 @@ const statusColors = {
   DONE: "bg-green-100 text-green-800",
 };
 
-export default function TaskCard({ task, onDelete, onEdit }: TaskCardProps) {
+export default function TaskCard({ task, onDelete, onEdit, onStatusChange }: TaskCardProps) {
   const [isUpdating, setIsUpdating] = useState(false);
 
   async function handleStatusChange(newStatus: TaskStatus) {
     try {
       setIsUpdating(true);
-      await updateTask(task.id, { status: newStatus });
-      // Refresh the page to see updated data
-      window.location.reload();
+      await onStatusChange(task.id, newStatus);
     } catch (error) {
       console.error("Failed to update status:", error);
       alert("Failed to update task status");
