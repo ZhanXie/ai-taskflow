@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --webpack",
-    "dev:up": "docker compose up -d && sleep 3 && npm run db:generate && npm run db:push && next dev",
+    "dev:up": "docker compose up -d --wait && npm run db:generate && npm run db:push && next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --fix",
@@ -18,7 +18,7 @@
     "setup": "npm install && npm run db:generate && npm run db:push"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^2.0.0",
+    "@ai-sdk/openai": "^3.0.52",
     "@clerk/nextjs": "^7.0.8",
     "@prisma/client": "^6.19.3",
     "ai": "^6.0.142",

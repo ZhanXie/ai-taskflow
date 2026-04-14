@@ -5,6 +5,13 @@ CREATE TYPE "TaskStatus" AS ENUM ('TODO', 'IN_PROGRESS', 'DONE');
 CREATE TYPE "Priority" AS ENUM ('LOW', 'MEDIUM', 'HIGH');
 
 -- CreateTable
+CREATE TABLE "User" (
+    "id" TEXT NOT NULL,
+
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Task" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
@@ -21,3 +28,6 @@ CREATE TABLE "Task" (
 
 -- CreateIndex
 CREATE INDEX "Task_userId_idx" ON "Task"("userId");
+
+-- AddForeignKey
+ALTER TABLE "Task" ADD CONSTRAINT "Task_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

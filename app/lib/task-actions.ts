@@ -23,10 +23,17 @@ type TaskInput = z.infer<typeof TaskSchema>;
 export async function createTask(input: TaskInput): Promise<Task> {
   try {
     const userId = await getCurrentUserId();
-    
+
     // Validate input
     const validated = TaskSchema.parse(input);
-    
+
+    // Ensure user exists in database (create if not exists)
+    await prisma.user.upsert({
+      where: { id: userId },
+      create: { id: userId },
+      update: {},
+    });
+
     const task = await prisma.task.create({
       data: {
         ...validated,

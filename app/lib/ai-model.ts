@@ -1,18 +1,18 @@
 import { createOpenAI } from "@ai-sdk/openai";
 
 /**
- * Tencent Hunyuan model configured via OpenAI-compatible API.
- * Uses HUNYUAN_* environment variables for configuration.
+ * Qwen (Tongyi Qianwen) model configured via OpenAI-compatible API.
+ * Uses QWEN_* environment variables for configuration.
  */
-const hunyuan = createOpenAI({
-  apiKey: process.env.HUNYUAN_API_KEY,
-  baseURL: process.env.HUNYUAN_BASE_URL ?? "https://api.hunyuan.cloud.tencent.com/v1",
+const qwen = createOpenAI({
+  apiKey: process.env.QWEN_API_KEY,
+  baseURL: process.env.QWEN_BASE_URL ?? "https://dashscope.aliyuncs.com/compatible-mode/v1",
 });
 
 /**
  * Primary model for AI suggestions.
- * Configurable via HUNYUAN_MODEL env var (default: hunyuan-lite).
+ * Configurable via QWEN_MODEL env var (default: qwen-plus).
  */
-export const suggestionModel = hunyuan(
-  process.env.HUNYUAN_MODEL ?? "hunyuan-lite"
+export const suggestionModel = qwen(
+  process.env.QWEN_MODEL ?? "qwen-plus"
 );
