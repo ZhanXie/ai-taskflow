@@ -1,18 +1,18 @@
 import { createOpenAI } from "@ai-sdk/openai";
 
 /**
- * Qwen (Tongyi Qianwen) model configured via OpenAI-compatible API.
- * Uses QWEN_* environment variables for configuration.
+ * OpenRouter model configured via OpenAI-compatible API.
+ * Uses OPENR_* environment variables for configuration.
  */
-const qwen = createOpenAI({
-  apiKey: process.env.QWEN_API_KEY,
-  baseURL: process.env.QWEN_BASE_URL ?? "https://dashscope.aliyuncs.com/compatible-mode/v1",
+const openRouter = createOpenAI({
+  apiKey: process.env.OPEN_API_KEY,
+  baseURL: process.env.OPEN_BASE_URL ?? "https://openrouter.ai/api/v1",
 });
 
 /**
  * Primary model for AI suggestions.
- * Configurable via QWEN_MODEL env var (default: qwen-plus).
+ * Configurable via OPENROUTER_MODEL env var (default: openrouter/free).
  */
-export const suggestionModel = qwen(
-  process.env.QWEN_MODEL ?? "qwen-plus"
+export const suggestionModel = openRouter(
+  process.env.OPEN_MODEL ?? "openrouter/free"
 );
